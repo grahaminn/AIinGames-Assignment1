@@ -10,9 +10,8 @@ import java.util.*;
 
 import static java.util.stream.Collectors.*;
 import static players.PlayerConstants.*;
-import static utilities.Utils.noise;
 
-class BasicTreeNode {
+abstract class BasicTreeNode {
     // Root node of tree
     BasicTreeNode root;
     // Parent of this node
@@ -22,26 +21,21 @@ class BasicTreeNode {
     // Depth of this node
     final int depth;
 
-    // Total value of this node
-    private double totValue;
-    // Number of visits
-    private int nVisits;
     // Number of FM calls and State copies up until this node
-    private int fmCallsCount;
+    protected int fmCallsCount;
     // Parameters guiding the search
-    private BasicMCTSPlayer player;
+    protected BasicMCTSPlayer player;
     private Random rnd;
     private RandomPlayer randomPlayer = new RandomPlayer();
 
     // State in this node (closed loop)
-    private AbstractGameState state;
+    protected AbstractGameState state;
 
     protected BasicTreeNode(BasicMCTSPlayer player, BasicTreeNode parent, AbstractGameState state, Random rnd) {
         this.player = player;
         this.fmCallsCount = 0;
         this.parent = parent;
         this.root = parent == null ? this : parent.root;
-        totValue = 0.0;
         setState(state);
         if (parent != null) {
             depth = parent.depth + 1;
@@ -122,14 +116,13 @@ class BasicTreeNode {
                 return cur;
             } else {
                 // Move to next child given by UCT function
-                AbstractAction actionChosen = cur.ucb();
-                cur = cur.children.get(actionChosen);
+                AbstractAction actionChosen = cur.selectAction();
+                cur = cur.children.get(actionChosen); 
             }
         }
 
         return cur;
     }
-
 
     private void setState(AbstractGameState newState) {
         state = newState;
@@ -164,7 +157,7 @@ class BasicTreeNode {
         advance(nextState, chosen.copy());
 
         // then instantiate a new node
-        BasicTreeNode tn = new BasicTreeNode(player, this, nextState, rnd);
+        BasicTreeNode tn = player.params.treeNodeFactory.createNode(player, this, nextState, rnd);
         children.put(chosen, tn);
         return tn;
     }
@@ -178,50 +171,6 @@ class BasicTreeNode {
     private void advance(AbstractGameState gs, AbstractAction act) {
         player.getForwardModel().next(gs, act);
         root.fmCallsCount++;
-    }
-
-    private AbstractAction ucb() {
-        // Find child with highest UCB value, maximising for ourselves and minimizing for opponent
-        AbstractAction bestAction = null;
-        double bestValue = -Double.MAX_VALUE;
-
-        for (AbstractAction action : children.keySet()) {
-            BasicTreeNode child = children.get(action);
-            if (child == null)
-                throw new AssertionError("Should not be here");
-            else if (bestAction == null)
-                bestAction = action;
-
-            // Find child value
-            double hvVal = child.totValue;
-            double childValue = hvVal / (child.nVisits + player.params.epsilon);
-
-            // default to standard UCB
-            double explorationTerm = player.params.K * Math.sqrt(Math.log(this.nVisits + 1) / (child.nVisits + player.params.epsilon));
-            // unless we are using a variant
-
-            // Find 'UCB' value
-            // If 'we' are taking a turn we use classic UCB
-            // If it is an opponent's turn, then we assume they are trying to minimise our score (with exploration)
-            boolean iAmMoving = state.getCurrentPlayer() == player.getPlayerID();
-            double uctValue = iAmMoving ? childValue : -childValue;
-            uctValue += explorationTerm;
-
-            // Apply small noise to break ties randomly
-            uctValue = noise(uctValue, player.params.epsilon, player.rnd.nextDouble());
-
-            // Assign value
-            if (uctValue > bestValue) {
-                bestAction = action;
-                bestValue = uctValue;
-            }
-        }
-
-        if (bestAction == null)
-            throw new AssertionError("We have a null value in UCT : shouldn't really happen!");
-
-        root.fmCallsCount++;  // log one iteration complete
-        return bestAction;
     }
 
     /**
@@ -264,50 +213,24 @@ class BasicTreeNode {
     }
 
     /**
-     * Back up the value of the child through all parents. Increase number of visits and total value.
+     * Selects the action to take from the current node.
+     * Must handle the explore/exploit dilemma
+     * @return the action
+     */
+    abstract AbstractAction selectAction();
+
+    /**
+     * Back up the value of the child through all parents.
      *
      * @param result - value of rollout to backup
      */
-    private void backUp(double result) {
-        BasicTreeNode n = this;
-        while (n != null) {
-            n.nVisits++;
-            n.totValue += result;
-            n = n.parent;
-        }
-    }
+    abstract void backUp(double result);
 
     /**
-     * Calculates the best action from the root according to the most visited node
+     * Calculates the best action from the root according to algorithm
      *
      * @return - the best AbstractAction
      */
-    AbstractAction bestAction() {
-
-        double bestValue = -Double.MAX_VALUE;
-        AbstractAction bestAction = null;
-
-        for (AbstractAction action : children.keySet()) {
-            if (children.get(action) != null) {
-                BasicTreeNode node = children.get(action);
-                double childValue = node.nVisits;
-
-                // Apply small noise to break ties randomly
-                childValue = noise(childValue, player.params.epsilon, player.rnd.nextDouble());
-
-                // Save best value (highest visit count)
-                if (childValue > bestValue) {
-                    bestValue = childValue;
-                    bestAction = action;
-                }
-            }
-        }
-
-        if (bestAction == null) {
-            throw new AssertionError("Unexpected - no selection made.");
-        }
-
-        return bestAction;
-    }
+    abstract AbstractAction bestAction();
 
 }

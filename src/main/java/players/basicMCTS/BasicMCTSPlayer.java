@@ -45,7 +45,7 @@ public class BasicMCTSPlayer extends AbstractPlayer {
     @Override
     public AbstractAction _getAction(AbstractGameState gameState, List<AbstractAction> actions) {
         // Search for best action from the root
-        BasicTreeNode root = new BasicTreeNode(this, null, gameState, rnd);
+        BasicTreeNode root = params.treeNodeFactory.createNode(this, null, gameState, rnd);
 
         // mctsSearch does all of the hard work
         root.mctsSearch();
