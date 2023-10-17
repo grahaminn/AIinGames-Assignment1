@@ -14,6 +14,11 @@ public class TreeNodeFactory {
         if(exporationStrategy == MCTSEnums.ExplorationStrategy.UCB1){
             return new UCB1TreeNode(player, parent, state, rnd);
         }
+        
+        if(exporationStrategy == MCTSEnums.ExplorationStrategy.EGreedy){
+            return new EGreedyTreeNode(player, parent, state, rnd);
+        }
+        
         return new UCB1TreeNode(player, parent, state, rnd);
     }
 }

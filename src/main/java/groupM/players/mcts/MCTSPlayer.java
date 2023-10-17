@@ -26,7 +26,7 @@ public class MCTSPlayer extends AbstractPlayer {
     public MCTSPlayer(long seed) {
         this.params = new MCTSParams(seed);
         rnd = new Random(seed);
-        setName("GroupM MCTS");
+        setName(getName());
 
         // These parameters can be changed, and will impact the Basic MCTS algorithm
         this.params.K = Math.sqrt(2);
@@ -39,7 +39,7 @@ public class MCTSPlayer extends AbstractPlayer {
     public MCTSPlayer(MCTSParams params) {
         this.params = params;
         rnd = new Random(params.getRandomSeed());
-        setName("GroupM MCTS");
+        setName(getName());
     }
 
     @Override
@@ -62,11 +62,15 @@ public class MCTSPlayer extends AbstractPlayer {
 
     @Override
     public String toString() {
-        return "GroupM MCTS";
+        return getName();
     }
 
     @Override
     public MCTSPlayer copy() {
         return this;
+    }
+
+    private String getName(){
+        return "GroupM - MCTS ( " + params.exporationStrategy + " )";
     }
 }

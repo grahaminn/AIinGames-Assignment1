@@ -257,12 +257,12 @@ abstract class TreeNode {
         return !rollerState.isNotTerminal();
     }
 
-    private AbstractAction selectAction() {
+    protected AbstractAction selectAction() {
      AbstractAction bestAction = null;
      double bestValue = -Double.MAX_VALUE;
 
      for (AbstractAction action : children.keySet()) {
-        UCB1TreeNode child = (UCB1TreeNode) children.get(action);
+        TreeNode child = (TreeNode) children.get(action);
          if (child == null)
              throw new AssertionError("Should not be here");
          else if (bestAction == null)
