@@ -4,8 +4,6 @@ import java.util.Comparator;
 import java.util.Random;
 
 import core.AbstractGameState;
-import core.actions.AbstractAction;
-import org.apache.hadoop.io.Text;
 
 public class ThompsonTreeNode extends TreeNode {
     protected NormalGammaDistribution dist; 
@@ -47,6 +45,15 @@ public class ThompsonTreeNode extends TreeNode {
     @Override
     int getNVisits() {
         return this.dist.getNVisits();
+    }
+
+    @Override
+    void mergeThisNode(TreeNode node){
+        ThompsonTreeNode thompsonNode = (ThompsonTreeNode) node;
+
+        // this will calculate the mean of the two means in the distributions
+        // as this is the only value checked when selecting the best action
+        this.dist.merge(thompsonNode.dist);
     }
 
     double thompsonSample(ThompsonTreeNode child){
