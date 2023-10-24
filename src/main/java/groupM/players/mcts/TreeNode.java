@@ -53,7 +53,7 @@ abstract class TreeNode {
     /**
      * Performs full MCTS search, using the defined budget limits.
      */
-    void mctsSearch() {
+    public void mctsSearch() {
 
         // Variables for tracking time budget
         double avgTimeTaken;
@@ -104,27 +104,12 @@ abstract class TreeNode {
         }
     }
 
-    abstract Comparator<TreeNode> getPruningComparator();
-
     List<AbstractAction> unprunedActions() {
         return children.keySet().stream().filter(a->(children.get(a) == null || !children.get(a).pruned)).collect(toList());
     }
 
     List<TreeNode> unprunedNodes() {
         return children.values().stream().filter(a->!a.pruned).collect(toList());
-    }
-
-    private void pruneChildren() {
-        long childLog = Math.round(this.player.params.pruneAlpha*Math.log(children.size()));
-        long retainedChildren =
-                Math.max(childLog,this.player.params.minRetained);
-        List<TreeNode> childNodes = unprunedNodes();
-        childNodes.sort(getPruningComparator());
-        Iterator<TreeNode> childIt = childNodes.iterator();
-        while(unprunedActions().size() > retainedChildren) {
-            TreeNode node = childIt.next();
-            node.pruned = this.getNVisits()>=this.player.params.pruneThreshold;
-        }
     }
 
     /**
@@ -148,7 +133,7 @@ abstract class TreeNode {
             if (children.get(action) != null) {
                 TreeNode child = children.get(action);
                 double childValue = getChildValue(child, false);
-
+                // System.out.println(action.toString() + " -> " + childValue);
                 // Save best value
                 if (childValue > bestValue) {
                     bestValue = childValue;
@@ -163,7 +148,52 @@ abstract class TreeNode {
 
         return bestAction;
     }
-    
+
+    /**
+     * Merges another node with this node
+     * @param node the node to merge with
+     * @param depth how many layers of child nodes to also merge
+     */
+    void merge(TreeNode node, int depth){
+        mergeThisNode(node);
+        
+        // merge child nodes as well
+        if(depth > 0){
+            for(AbstractAction action : this.children.keySet()){
+                TreeNode thisChildNode = this.children.get(action);
+                TreeNode otherChildNode = node.children.get(action);
+                
+                // our child node is unexplored -> take the other's child node as our own
+                if(thisChildNode == null){
+                    node.children.put(action, otherChildNode);
+                    System.out.println("Set other child as merged roots child as was null");
+                    continue;
+                }
+
+                // other's child node is unexplored -> do nothing 
+                if(otherChildNode == null){
+                    System.out.println("Action ("+ action.toString() +") was not found in other child node's tree and results were not merged.");
+                    continue;
+                }
+
+                // merge the two child nodes
+                thisChildNode.merge(otherChildNode, depth - 1);
+            }
+        }
+    }
+
+    /**
+     * returns a comparator for pruning purposes
+     * @return
+     */
+    abstract Comparator<TreeNode> getPruningComparator();
+
+    /**
+     * Merges the current values of this node with another node
+     * @param node
+     */
+    abstract void mergeThisNode(TreeNode node);
+        
     /**
      * Returns the value of the child node according to the tree policy
      * @param child the child node to evaluate
@@ -181,7 +211,19 @@ abstract class TreeNode {
 
     abstract int getNVisits();
 
-
+    private void pruneChildren() {
+        long childLog = Math.round(this.player.params.pruneAlpha*Math.log(children.size()));
+        long retainedChildren =
+                Math.max(childLog,this.player.params.minRetained);
+        List<TreeNode> childNodes = unprunedNodes();
+        childNodes.sort(getPruningComparator());
+        Iterator<TreeNode> childIt = childNodes.iterator();
+        while(unprunedActions().size() > retainedChildren) {
+            TreeNode node = childIt.next();
+            node.pruned = this.getNVisits()>=this.player.params.pruneThreshold;
+        }
+    }
+    
     /**
      * Selection + expansion steps.
      * - Tree is traversed until a node not fully expanded is found.
