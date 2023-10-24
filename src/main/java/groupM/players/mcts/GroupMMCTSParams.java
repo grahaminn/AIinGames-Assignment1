@@ -13,6 +13,7 @@ public class GroupMMCTSParams extends PlayerParameters {
     public int rolloutLength = 10; // assuming we have a good heuristic
     public int maxTreeDepth = 100; // effectively no limit
     public double epsilon = 1e-6;
+    public int nRoots = 1;
     public IStateHeuristic heuristic = AbstractGameState::getHeuristicScore;
     public MCTSEnums.ExplorationStrategy exporationStrategy = MCTSEnums.ExplorationStrategy.UCB1;
     public TreeNodeFactory treeNodeFactory;
@@ -38,6 +39,7 @@ public class GroupMMCTSParams extends PlayerParameters {
         addTunableParameter("name", "Group M MCTS");
         addTunableParameter("amaf", false);
         addTunableParameter("amafV", 20);
+        addTunableParameter("nRoots", 1);
 
 
         addTunableParameter("heuristic", (IStateHeuristic) AbstractGameState::getHeuristicScore);
@@ -60,6 +62,7 @@ public class GroupMMCTSParams extends PlayerParameters {
         amafV = (int) getParameterValue("amafV");
         heuristic = (IStateHeuristic) getParameterValue("heuristic");
         name = (String) getParameterValue("name");
+        nRoots = (int) getParameterValue("nRoots");
         exporationStrategy = (MCTSEnums.ExplorationStrategy) getParameterValue("explorationStrategy");
         treeNodeFactory = new TreeNodeFactory(this);    
     }

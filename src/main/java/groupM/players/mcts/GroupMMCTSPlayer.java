@@ -40,20 +40,31 @@ public class GroupMMCTSPlayer extends AbstractPlayer {
         this.params = params;
         rnd = new Random(params.getRandomSeed());
         setName(this.params.name);
+
+        // divide budget by number of roots being run
+        this.params.budget /= this.params.nRoots;
+
     }
 
     @Override
     public AbstractAction _getAction(AbstractGameState gameState, List<AbstractAction> actions) {
-        // Search for best action from the root
-        TreeNode root = params.treeNodeFactory.createNode(this, null, gameState, rnd);
+        // create roots and run mcts for each
+        TreeNode[] roots = new TreeNode[this.params.nRoots];
+        for(int i = 0; i < this.params.nRoots; i++){
+            roots[i] = params.treeNodeFactory.createNode(this, null, gameState.copy(), rnd);            
+            roots[i].mctsSearch();
+        }
 
-        // mctsSearch does all of the hard work
-        root.mctsSearch();
+        // merge all the roots 
+        TreeNode masterRoot = roots[0];
+        for(TreeNode root : roots){
+            if(root != masterRoot){
+                masterRoot.merge(root, 1);
+            }
+        }
 
-        // Return best action
-        return root.bestAction();
+        return masterRoot.bestAction();
     }
-
 
     public void setStateHeuristic(IStateHeuristic heuristic) {
         this.params.heuristic = heuristic;
