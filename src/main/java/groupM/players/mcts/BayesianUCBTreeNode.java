@@ -16,7 +16,6 @@ public class BayesianUCBTreeNode extends UCB1TreeNode {
         super(player, parent, state, rnd);
         this.alpha = 1.0;
         this.beta = 1.0;
-        distribution = new BetaDistribution(alpha, beta);
     }
 
     @Override
