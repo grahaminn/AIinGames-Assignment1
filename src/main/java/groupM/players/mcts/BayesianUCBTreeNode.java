@@ -5,7 +5,11 @@ import core.AbstractGameState;
 import java.util.Comparator;
 import java.util.Random;
 
+import games.sushigo.SGParameters;
+import games.sushigo.cards.SGCard;
 import org.apache.commons.math3.distribution.BetaDistribution;
+
+import static games.sushigo.cards.SGCard.SGCardType.values;
 
 public class BayesianUCBTreeNode extends UCB1TreeNode {
 
@@ -40,11 +44,13 @@ public class BayesianUCBTreeNode extends UCB1TreeNode {
         BayesianUCBTreeNode node = this;
 
         while (node != null) {
-            if(this.state.getOrdinalPosition(this.player.getPlayerID())==1) {
-                node.alpha+=1;
-            }
-            else {
-                node.beta+=1;
+            if (this.state.getRoundCounter() >= ((SGParameters)this.state.getGameParameters()).nRounds) {
+                if(this.state.getOrdinalPosition(this.player.getPlayerID())==1) {
+                    node.alpha+=1;
+                }
+                else {
+                    node.beta+=1;
+                }
             }
             node.nVisits +=1;
             node.mean.increment(result);
