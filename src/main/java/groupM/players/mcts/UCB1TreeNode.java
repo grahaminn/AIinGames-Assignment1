@@ -3,7 +3,8 @@ package groupM.players.mcts;
 import java.util.Comparator;
 import java.util.Random;
 
-import core.actions.AbstractAction;
+import groupM.utils.MergeMean;
+
 import org.apache.commons.math3.stat.descriptive.moment.Mean;
 
 import static utilities.Utils.noise;
@@ -23,6 +24,7 @@ public class UCB1TreeNode extends TreeNode{
         return Comparator.comparing(c->ucb1(c));
     }
 
+    @Override
     void backUp(double result) {
         UCB1TreeNode n = this;
         while (n != null) {
@@ -37,7 +39,6 @@ public class UCB1TreeNode extends TreeNode{
         return this.nVisits;
     }
 
-
     @Override
     double getChildValue(TreeNode child, boolean isExpanding) {
         if(!isExpanding){
@@ -46,6 +47,13 @@ public class UCB1TreeNode extends TreeNode{
         return ucb1(child);
     }
 
+    @Override void mergeThisNode(TreeNode node){
+        UCB1TreeNode ucbNode = (UCB1TreeNode) node;
+
+        // only nVisits is used to calculate best action
+        // so only need to update this value
+        this.nVisits += ucbNode.nVisits;
+    }
 
     double ucb1(TreeNode child) {
         UCB1TreeNode ucbChild = (UCB1TreeNode) child;

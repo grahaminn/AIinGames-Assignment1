@@ -62,4 +62,18 @@ class NormalGammaDistribution{
     protected int getNVisits(){
         return this.nVisits;
     }
+
+    /**
+     * This function 'merges' two distributions.
+     * Note that this doesnt actually merge the distributions, it simply calculates the means of the two distribution means
+     * @param other the other distribution to merge
+     */
+    protected void merge(NormalGammaDistribution other){
+        this.nVisits += other.nVisits;
+
+        Mean mergedMean = new Mean();
+        mergedMean.increment(this.mean.getResult());
+        mergedMean.increment(other.mean.getResult());
+        this.mean = mergedMean;
+    }
 }

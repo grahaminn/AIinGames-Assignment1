@@ -25,14 +25,15 @@ import org.apache.hadoop.shaded.com.nimbusds.jose.shaded.json.JSONObject;
  */
 public class Experiment {
     // experiment config
-    public static String directory = "amafVsFullMCTS";
+    public static String directory = "thompsonVsMoreRoots";
     public static int nAgents = 2;
     public static int matchups = 100;
     public static long seed = 4567654;
+    public static int nRoots = 1;
 
     // Group M MCTS config
     public static String budgetType = "BUDGET_TIME";
-    public static long budget = 500;
+    public static long budget = 100;
     public static String explorationStrategy = "Thompson";
     public static boolean amaf = false;
     public static int rolloutLength = 20;
@@ -112,6 +113,7 @@ public class Experiment {
         agentJson.put("budgetType", budgetType);
         agentJson.put("budget", budget);
         agentJson.put("amaf", amaf);
+        agentJson.put("nRoots", nRoots);
 
         return writeToFile(Paths.get(experimentDir+"/agents"), "agent"+i+".json", agentJson);
        
