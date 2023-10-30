@@ -18,6 +18,8 @@ public class TreeNodeFactory {
                 return amaf ? new UCB1RaveTreeNode(player, parent, state, rnd) : new UCB1TreeNode(player, parent, state, rnd);
             case Thompson:
                 return amaf? new RaveThompsonTreeNode(player, parent, state, rnd) : new ThompsonTreeNode(player, parent, state, rnd);
+            case BayesUCB:
+                return new BayesianUCBTreeNode(player, parent, state, rnd);
             default:
                 return new UCB1TreeNode(player, parent, state, rnd);
         }
