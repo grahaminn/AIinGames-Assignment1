@@ -8,6 +8,9 @@ import core.interfaces.IStateHeuristic;
 import java.util.List;
 import java.util.Random;
 
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+
 
 /**
  * This is a simple version of MCTS that may be useful for newcomers to TAG and MCTS-like algorithms
@@ -18,6 +21,7 @@ public class GroupMMCTSPlayer extends AbstractPlayer {
 
     Random rnd;
     GroupMMCTSParams params;
+    JSONObject rootDataJson;
 
     public GroupMMCTSPlayer() {
         this(System.currentTimeMillis());
@@ -62,6 +66,7 @@ public class GroupMMCTSPlayer extends AbstractPlayer {
                 masterRoot.merge(root, 1);
             }
         }
+        rootDataJson = new JSONObject(masterRoot.iterData);
 
         return masterRoot.bestAction();
     }

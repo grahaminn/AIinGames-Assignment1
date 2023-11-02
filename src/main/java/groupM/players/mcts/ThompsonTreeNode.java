@@ -4,6 +4,9 @@ import java.util.Comparator;
 import java.util.Random;
 
 import core.AbstractGameState;
+import core.actions.AbstractAction;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 
 public class ThompsonTreeNode extends TreeNode {
     protected NormalGammaDistribution dist; 
@@ -58,6 +61,24 @@ public class ThompsonTreeNode extends TreeNode {
 
     double thompsonSample(ThompsonTreeNode child){
         return child.dist.sample(this.player.rnd);
+    }
+
+    @Override
+    JSONArray getChildrenJson(){
+        JSONArray childrenJson = new JSONArray();
+        int actionIndex = 0;
+        for (AbstractAction action : this.children.keySet()){
+            ThompsonTreeNode thompsonChild = (ThompsonTreeNode) this.children.get(action);
+            if(thompsonChild == null){
+                continue;
+            }
+            JSONObject childJson = thompsonChild.dist.toJSON();
+            childJson.put("actionIndex", actionIndex);
+            childJson.put("action", action.toString());
+            actionIndex += 1;
+            childrenJson.add(childJson);
+        }
+        return childrenJson;
     }
 }
 
