@@ -4,6 +4,7 @@ import java.util.Random;
 
 import org.apache.commons.math3.stat.descriptive.moment.Mean;
 import org.apache.commons.math3.util.FastMath;
+import org.json.simple.JSONObject;
 
 import umontreal.ssj.probdist.GammaDist;
 import umontreal.ssj.probdist.NormalDist;
@@ -75,5 +76,14 @@ class NormalGammaDistribution{
         mergedMean.increment(this.mean.getResult());
         mergedMean.increment(other.mean.getResult());
         this.mean = mergedMean;
+    }
+
+    protected JSONObject toJSON(){
+        JSONObject json = new JSONObject();
+        json.put("nVisits", this.nVisits);
+        json.put("alpha", this.alpha);
+        json.put("beta", this.beta);
+        json.put("mean", this.mean.getResult());
+        return json;
     }
 }

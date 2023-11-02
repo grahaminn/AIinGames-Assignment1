@@ -24,6 +24,7 @@ public class GroupMMCTSParams extends PlayerParameters {
     public int minRetained;
     public int pruneThreshold;
     public boolean prune;
+    public int logChildDataEverN = -1;
 
 
     public GroupMMCTSParams() {
@@ -40,8 +41,7 @@ public class GroupMMCTSParams extends PlayerParameters {
         addTunableParameter("amaf", false);
         addTunableParameter("amafV", 20);
         addTunableParameter("nRoots", 1);
-
-
+        addTunableParameter("logChildDataEverN", -1);
         addTunableParameter("heuristic", (IStateHeuristic) AbstractGameState::getHeuristicScore);
         addTunableParameter("explorationStrategy", MCTSEnums.ExplorationStrategy.UCB1, Arrays.asList(MCTSEnums.ExplorationStrategy.UCB1));
         addTunableParameter("pruneAlpha", 2);
@@ -63,6 +63,7 @@ public class GroupMMCTSParams extends PlayerParameters {
         heuristic = (IStateHeuristic) getParameterValue("heuristic");
         name = (String) getParameterValue("name");
         nRoots = (int) getParameterValue("nRoots");
+        logChildDataEverN = (int) getParameterValue("logChildDataEverN");
         exporationStrategy = (MCTSEnums.ExplorationStrategy) getParameterValue("explorationStrategy");
         treeNodeFactory = new TreeNodeFactory(this);    
     }

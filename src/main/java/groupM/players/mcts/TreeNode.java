@@ -8,6 +8,8 @@ import utilities.ElapsedCpuTimer;
 
 import java.util.*;
 
+import org.json.simple.JSONArray;
+
 import static java.util.stream.Collectors.*;
 import static players.PlayerConstants.*;
 
@@ -31,6 +33,7 @@ abstract class TreeNode {
 
     // State in this node (closed loop)
     protected AbstractGameState state;
+    Map<Integer, JSONArray> iterData = new HashMap<Integer, JSONArray>(); 
 
     protected boolean pruned;
 
@@ -101,6 +104,11 @@ abstract class TreeNode {
                 // FM calls budget
                 stop = fmCallsCount > player.params.budget;
             }
+
+            // log child data if enabled
+            if(player.params.logChildDataEverN > 0 &&  numIters % player.params.logChildDataEverN == 0){
+                iterData.put(numIters, getChildrenJson());
+            }
         }
     }
 
@@ -148,6 +156,11 @@ abstract class TreeNode {
 
         return bestAction;
     }
+
+    JSONArray getChildrenJson(){
+        return new JSONArray();
+    }
+
 
     /**
      * Merges another node with this node
