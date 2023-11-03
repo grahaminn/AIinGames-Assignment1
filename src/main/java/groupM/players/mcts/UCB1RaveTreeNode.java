@@ -33,6 +33,10 @@ public class UCB1RaveTreeNode extends UCB1TreeNode implements IAmafBackup{
         double explorationTerm = player.params.K * Math.sqrt(Math.log(this.nVisits + 1) / (ucbChild.nVisits + player.params.epsilon));
         
         double amafValue = ucbChild.amfMean.getResult();
+        if(Double.isNaN(amafValue)){
+            return super.ucb1(ucbChild);
+        }
+        
         double raveValue = RAVE.getValue(this.player.params.amafV, this.nVisits, qValue, amafValue);
         
         boolean iAmMoving = state.getCurrentPlayer() == player.getPlayerID();
