@@ -5,9 +5,13 @@ import core.AbstractPlayer;
 import core.actions.AbstractAction;
 import core.interfaces.IStateHeuristic;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
+import org.apache.commons.math3.analysis.function.Abs;
+import org.apache.commons.math3.stat.descriptive.moment.Mean;
 import org.json.simple.JSONObject;
 
 
@@ -57,18 +61,37 @@ public class GroupMMCTSPlayer extends AbstractPlayer {
             roots[i] = params.treeNodeFactory.createNode(this, null, gameState.copy(), rnd);            
             roots[i].mctsSearch();
         }
+        rootDataJson = new JSONObject(roots[0].iterData);
 
-        // merge all the roots 
-        TreeNode masterRoot = roots[0];
+        
+        // average out action values
+        Map<AbstractAction, Mean> actionValues = new HashMap<AbstractAction, Mean>();
         for(TreeNode root : roots){
-            if(root != masterRoot){
-                masterRoot.merge(root, 1);
+            for (AbstractAction action : root.children.keySet()) {
+                if (root.children.get(action) != null) {
+                    TreeNode child = root.children.get(action);
+                    double childValue = root.getChildValue(child, false);
+                    
+                    if(!actionValues.containsKey(action)){
+                        actionValues.put(action, new Mean());
+                    }
+
+                    actionValues.get(action).increment(childValue);
+                }
             }
         }
-        
-        rootDataJson = new JSONObject(masterRoot.iterData);
 
-        return masterRoot.bestAction();
+        double bestValue = -Double.MAX_VALUE;
+        AbstractAction bestAction = null;
+        for (AbstractAction action : actionValues.keySet()){
+            double mean = actionValues.get(action).getResult();
+            if (mean > bestValue) {
+                bestValue = mean;
+                bestAction = action;
+            }
+        }
+
+        return bestAction;
     }
 
     public void setStateHeuristic(IStateHeuristic heuristic) {
