@@ -5,7 +5,7 @@ import core.actions.AbstractAction;
 class AMAFRollout extends Rollout{
     @Override
     void backupRollout(TreeNode selectedNode){
-        super.backupRollout(selectedNode);
+        selectedNode.backUp(result);
         
         if(selectedNode.parent == null){
             return;

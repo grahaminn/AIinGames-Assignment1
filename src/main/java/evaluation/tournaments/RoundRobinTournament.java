@@ -274,6 +274,14 @@ public class RoundRobinTournament extends AbstractTournament {
                     }
                 }
                 sb.setCharAt(sb.length() - 1, ']');
+
+                sb.append(" | ");
+                for (int j = 0; j < matchUpPlayers.size(); j++) {
+                    sb.append(winsPerPlayer[j] +",");
+                }
+                sb.setCharAt(sb.length() - 1, '.');
+
+
                 System.out.println(sb);
             }
 

@@ -1,5 +1,7 @@
 package groupM.players.mcts;
 
+import static utilities.Utils.noise;
+
 import java.util.Random;
 
 import org.apache.commons.math3.stat.descriptive.moment.Mean;
@@ -30,13 +32,14 @@ public class UCB1RaveTreeNode extends UCB1TreeNode implements IAmafBackup{
         double qValue = ucbChild.mean.getResult();
         double explorationTerm = player.params.K * Math.sqrt(Math.log(this.nVisits + 1) / (ucbChild.nVisits + player.params.epsilon));
         
-        double amafValue = amfMean.getResult();
+        double amafValue = ucbChild.amfMean.getResult();
         double raveValue = RAVE.getValue(this.player.params.amafV, this.nVisits, qValue, amafValue);
         
         boolean iAmMoving = state.getCurrentPlayer() == player.getPlayerID();
         raveValue = iAmMoving ? raveValue : - raveValue;
-        
-        return raveValue + explorationTerm;
+        raveValue += explorationTerm;
+
+        return noise(raveValue, player.params.epsilon, player.rnd.nextDouble());
     }
 
     @Override

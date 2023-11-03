@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import scipy.stats as stats
 from IPython.core.pylabtools import figsize
 
-x = np.linspace(18, 25,1000)
+x = np.linspace(18, 45,1000)
 norm = stats.norm
 
 def plot_sockets(actions, iter, legend=False):
@@ -20,7 +20,7 @@ def plot_sockets(actions, iter, legend=False):
     # get the PDF of the socket using its estimates
     y = norm.pdf(x, mu, np.sqrt(v) )
     if legend:
-        p = plt.plot(x, y, lw=2, label = f'action {index} ({n_visitis} visits)')
+        p = plt.plot(x, y, lw=2, label = f'action {index}')
     else:
         p = plt.plot(x, y, lw=2)
     c = p[0].get_markeredgecolor()    
@@ -41,7 +41,7 @@ def plot_nodes(iterations, iteration_actions):
         plt.subplot(1 + (len(iterations) // 2), 2, j+1)         
         plt.subplots_adjust(hspace = 0.7)       
     
-        plot_sockets(iteration_actions[j], it) 
+        plot_sockets(iteration_actions[j], it, legend=j == 0) 
 
 def import_data(path, player_name):
     COLUMNS = ["Round", "Turn", "DataJson"]
@@ -81,9 +81,9 @@ def parse_turn_data(data, round, turn):
 
 
 if __name__ == "__main__":
-    data = import_data('experiments/thompson40ms/results/ThompsonStats.csv', 'Thompson')
-    iterations, iteration_actions = parse_turn_data(data,1, 2)
-    iteration_indexes = np.round(np.linspace(0, len(iterations) - 1, 10)).astype(int)
+    data = import_data('experiments/thompsonVsGroupMVisualise/results/ThompsonStats.csv', 'Thompson')
+    iterations, iteration_actions = parse_turn_data(data,1, 8)
+    iteration_indexes = np.round(np.linspace(0, len(iterations) - 1, 4)).astype(int)
     iterations = iterations[iteration_indexes]
     iteration_actions = iteration_actions[iteration_indexes]
     plot_nodes(iterations, iteration_actions)
